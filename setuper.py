@@ -1,11 +1,29 @@
+#!/usr/bin/env python3
+
+import os
 import re
 import random
+import sys
 
 
-def main():
+LOCK_FILE = "lock.txt"
+ALGORISM_FILE = "algorism.txt"
+
+
+def run():
+    lock_list = []
+    is_lock_file = os.path.isfile(LOCK_FILE)
+    if is_lock_file:
+        with open(LOCK_FILE, encoding="utf-8") as f:
+            lock_list = list(map(int, f.read().splitlines()))
+
+    is_alogrism_file = os.path.isfile(ALGORISM_FILE)
+    if not is_alogrism_file:
+        print("algorism.txtが存在しません。")
+        exit()
 
     quetions = []
-    with open("algorism.txt", encoding="utf-8") as f:
+    with open(ALGORISM_FILE, encoding="utf-8") as f:
         algo_list = f.read().splitlines()
         for algo in algo_list:
 
@@ -25,7 +43,14 @@ def main():
             quetions.append(" ".join(c))
             quetions.append(" ".join(f))
 
-    print(random.choice(quetions))
+    for lock_id in lock_list:
+        quetions.pop(lock_id)
+
+    for _ in range(run_count):
+        rand = random.choice(quetions)
+        index = quetions.index(rand)
+
+        print(str(index) + ": " + rand)
 
 
 def is_natural(text):
@@ -83,5 +108,16 @@ def convert(algos, setup=None):
     return algo
 
 
+def lock():
+    with open(LOCK_FILE, mode="a") as f:
+        f.write(str(lock_id) + "\n")
+
+
 if __name__ == "__main__":
-    main()
+    action = sys.argv[1]
+    if action == "run":
+        run_count = int(sys.argv[2])
+        run()
+    elif action == "lock":
+        lock_id = int(sys.argv[2])
+        lock()
